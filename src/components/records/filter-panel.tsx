@@ -173,7 +173,7 @@ export function FilterPanel({ fields, searchPlaceholder }: FilterPanelProps) {
                     aria-label={`${f.label} من`}
                     placeholder="من"
                     value={values[f.minName] ?? ""}
-                    onChange={(e) => set(f.minName, e.target.value.replace(/\D/g, "").slice(0, 3))}
+                    onChange={(e) => set(f.minName, e.target.value.replace(/\D/g, "").slice(0, f.maxDigits ?? 3))}
                   />
                   <span className="text-xs text-slate-500">إلى</span>
                   <Input
@@ -181,7 +181,7 @@ export function FilterPanel({ fields, searchPlaceholder }: FilterPanelProps) {
                     aria-label={`${f.label} إلى`}
                     placeholder="إلى"
                     value={values[f.maxName] ?? ""}
-                    onChange={(e) => set(f.maxName, e.target.value.replace(/\D/g, "").slice(0, 3))}
+                    onChange={(e) => set(f.maxName, e.target.value.replace(/\D/g, "").slice(0, f.maxDigits ?? 3))}
                   />
                 </div>
               )}

@@ -2,7 +2,7 @@
 
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { HandHelping, MapPin, NotebookPen, Plus, Trash2, User, UserRound, UsersRound } from "lucide-react";
+import { CalendarDays, HandHelping, MapPin, NotebookPen, Plus, Trash2, User, UserRound, UsersRound } from "lucide-react";
 import { SectionCard } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input, Select, Textarea } from "@/components/ui/input";
@@ -15,6 +15,8 @@ import type { LookupOption } from "@/lib/types";
 import { RepeatableList } from "./repeatable-list";
 import { FormActions } from "./form-actions";
 import { onInvalidToast, useSaveHandler } from "./use-save-handler";
+
+const AGE_HINT = "اكتب السن (مثال: 45) أو سنة الميلاد (مثال: 1980)";
 
 type FamilyFormProps = {
   caseId?: string;
@@ -49,8 +51,8 @@ export function FamilyForm({ caseId, defaultValues, types }: FamilyFormProps) {
             <Field label="اسم الأب" htmlFor="father_name" error={errors.father_name?.message} className="sm:col-span-3" required>
               <Input id="father_name" {...register("father_name")} invalid={!!errors.father_name} />
             </Field>
-            <Field label="سن الأب" htmlFor="father_age" error={errors.father_age?.message}>
-              <Input id="father_age" inputMode="numeric" {...register("father_age")} invalid={!!errors.father_age} />
+            <Field label="السن أو سنة الميلاد" htmlFor="father_age_or_year" error={errors.father_age_or_year?.message} hint={AGE_HINT}>
+              <Input id="father_age_or_year" inputMode="numeric" {...register("father_age_or_year")} invalid={!!errors.father_age_or_year} />
             </Field>
             <Field label="عمل الأب" htmlFor="father_job" error={errors.father_job?.message} className="sm:col-span-2">
               <Input id="father_job" {...register("father_job")} invalid={!!errors.father_job} />
@@ -63,8 +65,8 @@ export function FamilyForm({ caseId, defaultValues, types }: FamilyFormProps) {
             <Field label="اسم الأم" htmlFor="mother_name" error={errors.mother_name?.message} className="sm:col-span-3">
               <Input id="mother_name" {...register("mother_name")} invalid={!!errors.mother_name} />
             </Field>
-            <Field label="سن الأم" htmlFor="mother_age" error={errors.mother_age?.message}>
-              <Input id="mother_age" inputMode="numeric" {...register("mother_age")} invalid={!!errors.mother_age} />
+            <Field label="السن أو سنة الميلاد" htmlFor="mother_age_or_year" error={errors.mother_age_or_year?.message} hint={AGE_HINT}>
+              <Input id="mother_age_or_year" inputMode="numeric" {...register("mother_age_or_year")} invalid={!!errors.mother_age_or_year} />
             </Field>
             <Field label="عمل الأم" htmlFor="mother_job" error={errors.mother_job?.message} className="sm:col-span-2">
               <Input id="mother_job" {...register("mother_job")} invalid={!!errors.mother_job} />
@@ -83,7 +85,7 @@ export function FamilyForm({ caseId, defaultValues, types }: FamilyFormProps) {
           addLabel="إضافة ابن / ابنة"
           emptyText="لم تتم إضافة أبناء بعد"
           itemTitle={(i) => `الابن / الابنة ${i + 1}`}
-          onAdd={() => children.append({ name: "", age: "", education_stage: "" }, { shouldFocus: true })}
+          onAdd={() => children.append({ name: "", age_or_year: "", education_stage: "" }, { shouldFocus: true })}
           onRemove={children.remove}
           renderItem={(_, i) => {
             const e = errors.children?.[i];
@@ -92,8 +94,8 @@ export function FamilyForm({ caseId, defaultValues, types }: FamilyFormProps) {
                 <Field label="الاسم" htmlFor={`children.${i}.name`} error={e?.name?.message} className="sm:col-span-2" required>
                   <Input id={`children.${i}.name`} {...register(`children.${i}.name`)} invalid={!!e?.name} />
                 </Field>
-                <Field label="العمر" htmlFor={`children.${i}.age`} error={e?.age?.message}>
-                  <Input id={`children.${i}.age`} inputMode="numeric" {...register(`children.${i}.age`)} invalid={!!e?.age} />
+                <Field label="العمر أو سنة الميلاد" htmlFor={`children.${i}.age_or_year`} error={e?.age_or_year?.message}>
+                  <Input id={`children.${i}.age_or_year`} inputMode="numeric" {...register(`children.${i}.age_or_year`)} invalid={!!e?.age_or_year} />
                 </Field>
                 <Field label="المرحلة التعليمية" htmlFor={`children.${i}.education_stage`} error={e?.education_stage?.message}>
                   <Select id={`children.${i}.education_stage`} {...register(`children.${i}.education_stage`)}>
@@ -184,6 +186,17 @@ export function FamilyForm({ caseId, defaultValues, types }: FamilyFormProps) {
             <Input id="other_assistance" placeholder="اكتب نوع المساعدة" {...register("other_assistance")} />
           </Field>
         ) : null}
+      </SectionCard>
+
+      <SectionCard title="تاريخ الخدمة والمصاريف" icon={<CalendarDays />}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="تاريخ الخدمة" htmlFor="service_date" error={errors.service_date?.message}>
+            <Input id="service_date" type="date" {...register("service_date")} invalid={!!errors.service_date} />
+          </Field>
+          <Field label="المصاريف (بالجنيه)" htmlFor="expense_amount" error={errors.expense_amount?.message} hint="إجمالي تكلفة الخدمة المقدمة">
+            <Input id="expense_amount" inputMode="decimal" dir="ltr" className="text-start" placeholder="0" {...register("expense_amount")} invalid={!!errors.expense_amount} />
+          </Field>
+        </div>
       </SectionCard>
 
       <SectionCard title="الملاحظات" icon={<NotebookPen />}>

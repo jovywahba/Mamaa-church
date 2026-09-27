@@ -23,6 +23,7 @@ export type FamilyChild = {
   id: string;
   name: string;
   age: number | null;
+  birth_year: number | null;
   education_stage: string | null;
   sort_order: number;
 };
@@ -31,13 +32,21 @@ export type FamilyCase = {
   id: string;
   father_name: string | null;
   father_age: number | null;
+  father_birth_year: number | null;
   father_job: string | null;
   mother_name: string | null;
   mother_age: number | null;
+  mother_birth_year: number | null;
   mother_job: string | null;
   address: string | null;
   notes: string | null;
   other_assistance: string | null;
+  service_date: string | null;
+  expense_amount: number | null;
+  /** Original "نوع الخدمة" wording for records imported from the old forms. */
+  source_service_type: string | null;
+  /** Original form submission time for imported records. */
+  source_recorded_at: string | null;
   created_at: string;
   updated_at: string;
   children: FamilyChild[];
@@ -55,6 +64,8 @@ export type FamilyListRow = {
   children_count: number;
   phones: string[];
   type_names: string[];
+  service_date: string | null;
+  expense_amount: number | null;
   created_at: string;
   total_count: number;
 };

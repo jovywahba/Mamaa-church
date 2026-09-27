@@ -64,3 +64,20 @@ export function familyTitle(father: string | null, mother: string | null): strin
   if (mother) return `أسرة ${mother}`;
   return "بدون اسم";
 }
+
+const moneyFormatter = new Intl.NumberFormat("ar-EG-u-nu-latn", { maximumFractionDigits: 2 });
+
+/** Egyptian pounds, e.g. "3,400 ج.م". */
+export function formatMoney(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return `${moneyFormatter.format(value)} ج.م`;
+}
+
+/** Plain date (YYYY-MM-DD, no time zone shift). */
+export function formatPlainDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  const [y, m, d] = value.slice(0, 10).split("-").map(Number);
+  return new Intl.DateTimeFormat("ar-EG-u-nu-latn", { timeZone: "UTC", year: "numeric", month: "long", day: "numeric" }).format(
+    new Date(Date.UTC(y, m - 1, d)),
+  );
+}

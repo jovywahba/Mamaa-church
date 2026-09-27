@@ -3,7 +3,7 @@ import type { Option } from "@/components/ui/checkbox-group";
 export type FilterField =
   | { name: string; label: string; type: "text"; placeholder?: string; dir?: "ltr" }
   | { name: string; label: string; type: "date" }
-  | { name: string; label: string; type: "number-range"; minName: string; maxName: string }
+  | { name: string; label: string; type: "number-range"; minName: string; maxName: string; maxDigits?: number }
   | { name: string; label: string; type: "date-range"; fromName: string; toName: string }
   | { name: string; label: string; type: "select"; options: Option[] }
   | { name: string; label: string; type: "multi"; options: Option[] };
@@ -33,9 +33,9 @@ export function spDate(sp: SP, key: string): string | undefined {
   return s && DATE.test(s) ? s : undefined;
 }
 
-export function spInt(sp: SP, key: string): string | undefined {
+export function spInt(sp: SP, key: string, maxDigits = 3): string | undefined {
   const s = spString(sp, key);
-  return s && /^\d{1,3}$/.test(s) ? s : undefined;
+  return s && new RegExp(`^\\d{1,${maxDigits}}$`).test(s) ? s : undefined;
 }
 
 /** Keys (other than q/page) that count as an active filter. */

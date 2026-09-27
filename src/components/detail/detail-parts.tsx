@@ -47,20 +47,28 @@ export function SystemInfo({
   updatedAt,
   creator,
   updater,
+  importedFrom,
 }: {
   id: string;
   createdAt: string;
   updatedAt: string;
   creator: AuditPerson;
   updater: AuditPerson;
+  /** Provenance line for records imported from historical files. */
+  importedFrom?: string;
 }) {
   return (
     <SectionCard title="معلومات النظام" icon={<Settings2 />}>
       <InfoGrid cols={2}>
         <InfoItem label="تاريخ إضافة الحالة">{formatDateTime(createdAt)}</InfoItem>
         <InfoItem label="آخر تعديل">{formatDateTime(updatedAt)}</InfoItem>
-        <InfoItem label="أضيفت بواسطة">{personLabel(creator)}</InfoItem>
+        <InfoItem label="أضيفت بواسطة">{creator ? personLabel(creator) : importedFrom ? "استيراد تلقائي" : "—"}</InfoItem>
         <InfoItem label="آخر تعديل بواسطة">{personLabel(updater)}</InfoItem>
+        {importedFrom && (
+          <InfoItem label="مصدر السجل" className="sm:col-span-2">
+            {importedFrom}
+          </InfoItem>
+        )}
         <InfoItem label="رقم السجل" className="sm:col-span-2">
           <bdi dir="ltr" className="font-mono text-xs text-slate-600 select-all">
             {id}

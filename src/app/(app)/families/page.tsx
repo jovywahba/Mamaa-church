@@ -33,12 +33,18 @@ export default async function FamiliesPage(props: PageProps<"/families">) {
     child_age_min: spInt(sp, "cage_min"),
     child_age_max: spInt(sp, "cage_max"),
     education_stage: spString(sp, "stage"),
+    service_from: spDate(sp, "sfrom"),
+    service_to: spDate(sp, "sto"),
+    expense_min: spInt(sp, "emin", 9),
+    expense_max: spInt(sp, "emax", 9),
   };
 
   const [types, { rows, total }] = await Promise.all([getFamilyAssistanceTypes(), listFamilyCases(filters, page)]);
 
   const fields: FilterField[] = [
     { name: "types", label: "نوع المساعدة", type: "multi", options: types.map((t) => ({ value: t.id, label: t.name_ar })) },
+    { name: "service", label: "تاريخ الخدمة", type: "date-range", fromName: "sfrom", toName: "sto" },
+    { name: "expense", label: "المصاريف (جنيه)", type: "number-range", minName: "emin", maxName: "emax", maxDigits: 9 },
     { name: "date", label: "تاريخ الإضافة", type: "date-range", fromName: "from", toName: "to" },
     { name: "father", label: "اسم الأب", type: "text" },
     { name: "mother", label: "اسم الأم", type: "text" },

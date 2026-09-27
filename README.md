@@ -21,7 +21,9 @@ Features: secure login, dashboard, full create / view / edit / delete for both s
 
 ```
 supabase/schema.sql          Complete database schema: tables, FKs, indexes, triggers, RPCs, RLS
+supabase/migrations/         Incremental migrations for an existing database (already included in schema.sql)
 scripts/create-user.mjs      CLI to create/update an application user (uses the service-role key locally)
+scripts/import-families-csv.mjs  One-time, idempotent import of historical family-assistance CSV files
 src/proxy.ts                 Refreshes the session and blocks unauthenticated requests
 src/app/login                Login page (username or email + password)
 src/app/(app)/               Protected area: dashboard, families, donations, search, users
@@ -44,8 +46,8 @@ All primary keys are UUIDs. Every table has `created_at`, and case tables also h
 | --- | --- |
 | `profiles` | One row per application user (username, full name, role `admin`/`staff`, `is_active`). Created automatically by a trigger on `auth.users`. |
 | `family_assistance_types` | Lookup: the 11 assistance types + «أخرى» (seeded). |
-| `family_assistance_cases` | Main family record (father/mother data, address, notes, other assistance). |
-| `family_assistance_children` | Children of a family (name, age, education stage), `ON DELETE CASCADE`. |
+| `family_assistance_cases` | Main record of a family service: father/mother data (age **or** birth year), address, notes, other assistance, `service_date` (تاريخ الخدمة), `expense_amount` (المصاريف, EGP) and, for imported rows, provenance (`source_service_type`, `source_recorded_at`, `import_key`). |
+| `family_assistance_children` | Children of a family (name, age or birth year, education stage), `ON DELETE CASCADE`. |
 | `family_assistance_phones` | Any number of phone numbers per family, `ON DELETE CASCADE`. |
 | `family_assistance_case_types` | Many-to-many: family ↔ assistance types. |
 | `donation_categories` | Lookup: «المساعدة موجهة إلى» categories + «أخرى» (seeded). |
@@ -83,6 +85,34 @@ AUTH_EMAIL_DOMAIN=mamachurch.local   # internal domain used to map usernames to 
    The script is idempotent, so you can run it again safely after updates.
 3. In **Project Settings → API**, copy the project URL, the anon/publishable key, and the service-role/secret key into `.env.local`.
 4. Optional: in **Authentication → Providers → Email**, turn off public sign-ups. Users are created only by an admin.
+
+### Updating an existing database
+
+`supabase/schema.sql` always describes the full, current schema, and running it again is safe. For an existing project you can also run only the new files in `supabase/migrations/`, in date order, in the SQL Editor:
+
+| Migration | Adds |
+| --- | --- |
+| `20260927_family_service_history.sql` | Service date, expenses, and birth years for family records, plus the service-role-only `import_family_case` RPC |
+
+## Importing historical family data (CSV)
+
+`scripts/import-families-csv.mjs` imports the old Google-Forms exports of «خدمات من يديك أعطيناك إلى الأسر». These imports go into the **families section only**.
+
+```bash
+# 1. Put the CSV files in data-import/ (git-ignored; they contain personal data)
+# 2. Dry run: prints an analysis and writes data-import/import-report-dry-run.json
+node --env-file=.env.local scripts/import-families-csv.mjs data-import/*.csv
+# 3. Import
+node --env-file=.env.local scripts/import-families-csv.mjs --apply data-import/*.csv
+```
+
+- **Cleaning:** the script converts Arabic digits to Latin digits and removes invisible bidi marks and extra whitespace. It turns form placeholders (`0000`, `00`, `-----`, `00000000000`) into empty values. Values from 1900 up to the current year are stored as birth years, not ages. Several phone numbers in one cell are split into separate phones. Notes are kept in full.
+- **Test/junk rows:** rows with numbers typed into the name, job, and address fields are excluded and listed in the report.
+- **True duplicates:** rows with identical content (the form timestamp is ignored) are imported once.
+- **Separate services:** several services for the same family stay as separate records, because they differ in date, type, cost, or notes.
+- **Service types:** the old «نوع الخدمة» values map to the current assistance types only when the match is confident. Anything else goes under «أخرى», with the original wording kept.
+- **Idempotent:** each record gets a SHA-256 `import_key`, so running the import again skips records that are already there.
+- **Security:** the script writes through the `import_family_case` RPC, which only the service role can execute.
 
 ## Running locally
 

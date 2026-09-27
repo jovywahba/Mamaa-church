@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteFamilyCase } from "@/lib/actions/family";
-import { familyTitle, formatDate } from "@/lib/format";
+import { familyTitle, formatDate, formatMoney, formatPlainDate } from "@/lib/format";
 import type { FamilyListRow } from "@/lib/types";
 import { BadgeList } from "@/components/ui/badge";
 import { PhoneNumber } from "@/components/ui/phone";
@@ -21,8 +21,8 @@ function Actions({ row }: { row: FamilyListRow }) {
 }
 
 const columns: Column<FamilyListRow>[] = [
-  { key: "father", header: "اسم الأب", cell: (r) => <span className="font-semibold text-slate-900">{r.father_name || dash}</span> },
-  { key: "mother", header: "اسم الأم", cell: (r) => r.mother_name || dash },
+  { key: "father", header: "اسم الأب", className: "min-w-40", cell: (r) => <span className="font-semibold text-slate-900">{r.father_name || dash}</span> },
+  { key: "mother", header: "اسم الأم", className: "min-w-36", cell: (r) => r.mother_name || dash },
   { key: "children", header: "عدد الأولاد", className: "text-center", cell: (r) => <span className="tabular-nums">{r.children_count}</span> },
   {
     key: "phone",
@@ -37,8 +37,20 @@ const columns: Column<FamilyListRow>[] = [
         dash
       ),
   },
-  { key: "address", header: "العنوان", className: "max-w-56", cell: (r) => (r.address ? <span className="line-clamp-2">{r.address}</span> : dash) },
-  { key: "types", header: "نوع المساعدة", className: "max-w-64", cell: (r) => <BadgeList items={r.type_names} /> },
+  { key: "address", header: "العنوان", className: "max-w-48", cell: (r) => (r.address ? <span className="line-clamp-2">{r.address}</span> : dash) },
+  { key: "types", header: "نوع المساعدة", className: "max-w-56", cell: (r) => <BadgeList items={r.type_names} max={1} /> },
+  {
+    key: "service",
+    header: "تاريخ الخدمة",
+    className: "whitespace-nowrap",
+    cell: (r) => (r.service_date ? formatPlainDate(r.service_date) : dash),
+  },
+  {
+    key: "expense",
+    header: "المصاريف",
+    className: "whitespace-nowrap tabular-nums",
+    cell: (r) => (r.expense_amount !== null ? formatMoney(r.expense_amount) : dash),
+  },
   { key: "created", header: "تاريخ الإضافة", className: "whitespace-nowrap", cell: (r) => formatDate(r.created_at) },
   { key: "actions", header: "إجراءات", className: "w-28", cell: (r) => <Actions row={r} /> },
 ];
@@ -62,7 +74,9 @@ export function FamilyTable({ rows }: { rows: FamilyListRow[] }) {
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
             <span>{r.children_count} أولاد</span>
             {r.phones[0] && <PhoneNumber value={r.phones[0]} withIcon />}
-            <span>{formatDate(r.created_at)}</span>
+            {r.service_date && <span>الخدمة: {formatPlainDate(r.service_date)}</span>}
+            {r.expense_amount !== null && <span>{formatMoney(r.expense_amount)}</span>}
+            <span>أضيفت: {formatDate(r.created_at)}</span>
           </div>
           {r.address && <p className="line-clamp-1 text-xs text-slate-500">{r.address}</p>}
           <BadgeList items={r.type_names} max={3} />

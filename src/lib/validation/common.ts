@@ -52,3 +52,26 @@ export function emptyToNull(v: string): string | null {
   const t = v.trim();
   return t === "" ? null : t;
 }
+
+/** Optional plain date (YYYY-MM-DD) from an <input type="date">. */
+export const dateField = (message = "التاريخ غير صحيح") =>
+  z
+    .string()
+    .trim()
+    .refine((v) => v === "" || (/^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v))), message);
+
+/** Parses an EGP amount typed with Arabic or Latin digits and optional thousands separators. */
+export function parseAmount(v: string): number | null {
+  const s = toLatinDigits(v.trim()).replace(/[,،\s]/g, "");
+  return s === "" ? null : Number(s);
+}
+
+/** Optional non-negative EGP amount, up to 2 decimals. */
+export const amountField = (message = "يرجى إدخال مبلغ صحيح بالجنيه (مثال: 1500)") =>
+  z
+    .string()
+    .trim()
+    .refine((v) => {
+      const s = toLatinDigits(v).replace(/[,،\s]/g, "");
+      return s === "" || (/^\d{1,10}(\.\d{1,2})?$/.test(s) && Number(s) >= 0);
+    }, message);

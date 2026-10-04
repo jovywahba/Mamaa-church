@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { HandHeart } from "lucide-react";
 import { requireUser } from "@/lib/auth";
-import { getDonationCategories } from "@/lib/data/lookups";
+import { getDonationCategories, getDonationTypes } from "@/lib/data/lookups";
+import { todayIso } from "@/lib/format";
 import { emptyDonationForm } from "@/lib/validation/donation";
 import { PageHeader } from "@/components/ui/page-header";
 import { DonationForm } from "@/components/forms/donation-form";
@@ -10,7 +11,7 @@ export const metadata: Metadata = { title: "إضافة حالة تبرع" };
 
 export default async function NewDonationPage() {
   await requireUser();
-  const categories = await getDonationCategories();
+  const [categories, donationTypes] = await Promise.all([getDonationCategories(), getDonationTypes()]);
   return (
     <>
       <PageHeader
@@ -19,7 +20,7 @@ export default async function NewDonationPage() {
         icon={<HandHeart />}
         breadcrumbs={[{ label: "الرئيسية", href: "/" }, { label: "التبرعات", href: "/donations" }, { label: "إضافة" }]}
       />
-      <DonationForm defaultValues={emptyDonationForm} categories={categories} />
+      <DonationForm defaultValues={{ ...emptyDonationForm, donation_date: todayIso() }} categories={categories} donationTypes={donationTypes} />
     </>
   );
 }

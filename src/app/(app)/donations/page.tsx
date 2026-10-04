@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { HandHeart, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { listDonationCases, type DonationFilters } from "@/lib/data/donation";
-import { getDonationCategories } from "@/lib/data/lookups";
+import { getDonationCategories, getDonationTypes } from "@/lib/data/lookups";
 import { PAGE_SIZE, SECTION_LABELS } from "@/lib/constants";
 import { PageHeader } from "@/components/ui/page-header";
 import { LinkButton } from "@/components/ui/button";
@@ -29,11 +29,20 @@ export default async function DonationsPage(props: PageProps<"/donations">) {
     father_name: spString(sp, "father"),
     mother_name: spString(sp, "mother"),
     phone: spString(sp, "phone"),
+    donation_type_ids: spList(sp, "dtypes"),
+    donation_from: spDate(sp, "dfrom"),
+    donation_to: spDate(sp, "dto"),
   };
 
-  const [categories, { rows, total }] = await Promise.all([getDonationCategories(), listDonationCases(filters, page)]);
+  const [categories, donationTypes, { rows, total }] = await Promise.all([
+    getDonationCategories(),
+    getDonationTypes(),
+    listDonationCases(filters, page),
+  ]);
 
   const fields: FilterField[] = [
+    { name: "dtypes", label: "نوع التبرع", type: "multi", options: donationTypes.map((t) => ({ value: t.id, label: t.name_ar })) },
+    { name: "donation_date", label: "تاريخ التبرع", type: "date-range", fromName: "dfrom", toName: "dto" },
     { name: "categories", label: "المساعدة موجهة إلى", type: "multi", options: categories.map((c) => ({ value: c.id, label: c.name_ar })) },
     { name: "date", label: "تاريخ الإضافة", type: "date-range", fromName: "from", toName: "to" },
     { name: "referred", label: "الحالة من طرف", type: "text" },

@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteDonationCase } from "@/lib/actions/donation";
-import { familyTitle, formatDate } from "@/lib/format";
+import { familyTitle, formatDate, formatMoney, formatPlainDate } from "@/lib/format";
 import type { DonationListRow } from "@/lib/types";
 import { BadgeList } from "@/components/ui/badge";
 import { PhoneNumber } from "@/components/ui/phone";
@@ -41,11 +41,23 @@ function Actions({ row }: { row: DonationListRow }) {
 }
 
 const columns: Column<DonationListRow>[] = [
-  { key: "father", header: "اسم الأب", cell: (r) => <span className="font-semibold text-slate-900">{r.father_name || dash}</span> },
-  { key: "mother", header: "اسم الأم", cell: (r) => r.mother_name || dash },
+  { key: "father", header: "اسم الأب", className: "min-w-40", cell: (r) => <span className="font-semibold text-slate-900">{r.father_name || dash}</span> },
+  { key: "mother", header: "اسم الأم", className: "min-w-36", cell: (r) => r.mother_name || dash },
   { key: "phones", header: "أرقام الهاتف", cell: (r) => <Phones row={r} /> },
   { key: "referred", header: "الحالة من طرف", cell: (r) => r.referred_by || dash },
-  { key: "categories", header: "المساعدة موجهة إلى", className: "max-w-64", cell: (r) => <BadgeList items={r.category_names} tone="green" /> },
+  {
+    key: "donation",
+    header: "نوع التبرع",
+    className: "max-w-56",
+    cell: (r) => (
+      <div className="space-y-1">
+        <BadgeList items={r.donation_type_names} max={2} tone="amber" />
+        {r.cash_amount !== null && <p className="text-xs font-semibold whitespace-nowrap text-slate-600 tabular-nums">{formatMoney(r.cash_amount)}</p>}
+      </div>
+    ),
+  },
+  { key: "donation_date", header: "تاريخ التبرع", className: "whitespace-nowrap", cell: (r) => (r.donation_date ? formatPlainDate(r.donation_date) : dash) },
+  { key: "categories", header: "المساعدة موجهة إلى", className: "max-w-56", cell: (r) => <BadgeList items={r.category_names} max={1} tone="green" /> },
   { key: "created", header: "تاريخ الإضافة", className: "whitespace-nowrap", cell: (r) => formatDate(r.created_at) },
   { key: "actions", header: "إجراءات", className: "w-28", cell: (r) => <Actions row={r} /> },
 ];
@@ -69,8 +81,11 @@ export function DonationTable({ rows }: { rows: DonationListRow[] }) {
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
             {r.referred_by && <span>من طرف: {r.referred_by}</span>}
             {(r.father_phone || r.mother_phone) && <PhoneNumber value={(r.father_phone || r.mother_phone)!} withIcon />}
-            <span>{formatDate(r.created_at)}</span>
+            {r.donation_date && <span>التبرع: {formatPlainDate(r.donation_date)}</span>}
+            {r.cash_amount !== null && <span>{formatMoney(r.cash_amount)}</span>}
+            <span>أضيفت: {formatDate(r.created_at)}</span>
           </div>
+          <BadgeList items={r.donation_type_names} max={3} tone="amber" />
           <BadgeList items={r.category_names} max={3} tone="green" />
         </div>
       )}

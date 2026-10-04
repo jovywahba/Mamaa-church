@@ -1,6 +1,9 @@
 import { z } from "zod";
 import {
   MAX_LONG_TEXT,
+  amountField,
+  dateField,
+  parseAmount,
   ageOrYearField,
   ageOrYearToInput,
   emptyToNull,
@@ -9,7 +12,7 @@ import {
   text,
   uuidList,
 } from "./common";
-import { normalizePhone, toLatinDigits } from "@/lib/utils";
+import { normalizePhone } from "@/lib/utils";
 import type { FamilyCase } from "@/lib/types";
 
 /** Children: an age up to 80 (DB limit for this section) or a birth year. */
@@ -17,24 +20,6 @@ const childAgeOrYearField = ageOrYearField.refine((v) => {
   const parsed = parseAgeOrYear(v);
   return !parsed || parsed.age === null || parsed.age <= 80;
 }, "العمر غير صحيح");
-
-const serviceDateField = z
-  .string()
-  .trim()
-  .refine((v) => v === "" || (/^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v))), "تاريخ الخدمة غير صحيح");
-
-export function parseAmount(v: string): number | null {
-  const s = toLatinDigits(v.trim()).replace(/[,،\s]/g, "");
-  return s === "" ? null : Number(s);
-}
-
-const expenseField = z
-  .string()
-  .trim()
-  .refine((v) => {
-    const s = toLatinDigits(v).replace(/[,،\s]/g, "");
-    return s === "" || (/^\d{1,10}(\.\d{1,2})?$/.test(s) && Number(s) >= 0);
-  }, "يرجى إدخال مبلغ صحيح بالجنيه (مثال: 1500)");
 
 export const familyChildSchema = z.object({
   name: text().min(1, "يرجى إدخال اسم الابن / الابنة"),
@@ -56,8 +41,8 @@ export const familyFormSchema = z
     notes: text(MAX_LONG_TEXT),
     type_ids: uuidList.min(1, "يرجى اختيار نوع مساعدة واحد على الأقل"),
     other_assistance: text(500),
-    service_date: serviceDateField,
-    expense_amount: expenseField,
+    service_date: dateField("تاريخ الخدمة غير صحيح"),
+    expense_amount: amountField(),
   })
   .superRefine((data, ctx) => {
     if (!data.father_name && !data.mother_name) {

@@ -7,6 +7,8 @@ export function toArabicError(error: SupabaseLikeError, fallback = "حدث خط�
 
   if (message.includes("ASSISTANCE_TYPE_REQUIRED")) return "يرجى اختيار نوع مساعدة واحد على الأقل";
   if (message.includes("DONATION_CATEGORY_REQUIRED")) return "يرجى اختيار جهة واحدة على الأقل للمساعدة";
+  if (message.includes("DONATION_TYPE_REQUIRED")) return "يرجى اختيار نوع التبرع";
+  if (message.includes("CASH_AMOUNT_REQUIRED")) return "يرجى إدخال مبلغ التبرع النقدي";
   if (message.includes("NOT_FOUND") || error.code === "PGRST116") return "السجل غير موجود أو تم حذفه";
   if (message.includes("NOT_AUTHORIZED") || error.code === "42501") return "ليس لديك صلاحية لتنفيذ هذا الإجراء";
   if (error.code === "23514") return "بعض البيانات المدخلة غير صحيحة، يرجى مراجعتها";

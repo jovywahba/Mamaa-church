@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowRight, HandHeart, HandHelping, Info, NotebookPen, Pencil, Phone, User, UserRound, UsersRound } from "lucide-react";
+import { ArrowRight, Gift, HandHeart, HandHelping, Info, NotebookPen, Pencil, Phone, User, UserRound, UsersRound } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getDonationCase } from "@/lib/data/donation";
 import { deleteDonationCase } from "@/lib/actions/donation";
-import { familyTitle, formatAgeOrBirthYear, formatDate } from "@/lib/format";
+import { familyTitle, formatAgeOrBirthYear, formatDate, formatMoney, formatPlainDate } from "@/lib/format";
 import { PageHeader } from "@/components/ui/page-header";
 import { LinkButton } from "@/components/ui/button";
 import { SectionCard } from "@/components/ui/card";
@@ -120,6 +120,32 @@ export default async function DonationDetailPage(props: PageProps<"/donations/[i
             </InfoGrid>
           </SectionCard>
         </div>
+
+        <SectionCard title="تفاصيل التبرع" icon={<Gift />}>
+          <InfoGrid cols={2}>
+            <InfoItem label="تاريخ التبرع">{record.donation_date ? formatPlainDate(record.donation_date) : null}</InfoItem>
+            <InfoItem label="المبلغ النقدي">{record.cash_amount !== null ? formatMoney(record.cash_amount) : null}</InfoItem>
+          </InfoGrid>
+          <div className="mt-4 space-y-1">
+            <p className="text-xs font-semibold text-slate-500">نوع التبرع</p>
+            {record.donation_types.length ? (
+              <div className="flex flex-wrap gap-2">
+                {record.donation_types.map((t) => (
+                  <Badge key={t.id} tone="amber" className="px-3 py-1 text-sm">
+                    {t.name_ar}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400">—</p>
+            )}
+          </div>
+          {record.other_donation_type && (
+            <div className="mt-4">
+              <InfoItem label="تفاصيل التبرعات الأخرى">{record.other_donation_type}</InfoItem>
+            </div>
+          )}
+        </SectionCard>
 
         <SectionCard title="المساعدة موجهة إلى" icon={<HandHelping />}>
           <div className="flex flex-wrap gap-2">

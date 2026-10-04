@@ -1,6 +1,9 @@
 import { z } from "zod";
 import {
   MAX_LONG_TEXT,
+  amountField,
+  dateField,
+  parseAmount,
   ageOrYearField,
   ageOrYearToInput,
   emptyToNull,
@@ -18,28 +21,44 @@ export const donationChildSchema = z.object({
   job: text(),
 });
 
-export const donationFormSchema = z
-  .object({
-    father_name: text(),
-    father_age_or_year: ageOrYearField,
-    father_job: text(),
-    mother_name: text(),
-    mother_age_or_year: ageOrYearField,
-    mother_job: text(),
-    children: z.array(donationChildSchema).max(30, "الحد الأقصى 30 ابن / ابنة"),
-    father_phone: phoneField,
-    mother_phone: phoneField,
-    notes: text(MAX_LONG_TEXT),
-    referred_by: text(),
-    category_ids: uuidList.min(1, "يرجى اختيار جهة واحدة على الأقل للمساعدة"),
-    other_category: text(500),
-    additional_notes: text(MAX_LONG_TEXT),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.father_name && !data.mother_name) {
-      ctx.addIssue({ code: "custom", path: ["father_name"], message: "يرجى إدخال اسم الأب (أو اسم الأم على الأقل)" });
-    }
-  });
+/**
+ * Builds the donation form schema. In the browser the id of the «نقدي» type is
+ * passed so a missing amount is caught before submitting; the server (and the
+ * save_donation_case RPC) enforce the same rule independently.
+ */
+export function makeDonationFormSchema(cashTypeId?: string) {
+  return z
+    .object({
+      father_name: text(),
+      father_age_or_year: ageOrYearField,
+      father_job: text(),
+      mother_name: text(),
+      mother_age_or_year: ageOrYearField,
+      mother_job: text(),
+      children: z.array(donationChildSchema).max(30, "الحد الأقصى 30 ابن / ابنة"),
+      father_phone: phoneField,
+      mother_phone: phoneField,
+      notes: text(MAX_LONG_TEXT),
+      referred_by: text(),
+      category_ids: uuidList.min(1, "يرجى اختيار جهة واحدة على الأقل للمساعدة"),
+      other_category: text(500),
+      additional_notes: text(MAX_LONG_TEXT),
+      donation_date: dateField("تاريخ التبرع غير صحيح"),
+      donation_type_ids: uuidList.min(1, "يرجى اختيار نوع التبرع"),
+      cash_amount: amountField(),
+      other_donation_type: text(500),
+    })
+    .superRefine((data, ctx) => {
+      if (!data.father_name && !data.mother_name) {
+        ctx.addIssue({ code: "custom", path: ["father_name"], message: "يرجى إدخال اسم الأب (أو اسم الأم على الأقل)" });
+      }
+      if (cashTypeId && data.donation_type_ids.includes(cashTypeId) && !data.cash_amount.trim()) {
+        ctx.addIssue({ code: "custom", path: ["cash_amount"], message: "يرجى إدخال مبلغ التبرع النقدي" });
+      }
+    });
+}
+
+export const donationFormSchema = makeDonationFormSchema();
 
 export type DonationFormValues = z.infer<typeof donationFormSchema>;
 
@@ -58,6 +77,10 @@ export const emptyDonationForm: DonationFormValues = {
   category_ids: [],
   other_category: "",
   additional_notes: "",
+  donation_date: "",
+  donation_type_ids: [],
+  cash_amount: "",
+  other_donation_type: "",
 };
 
 export function donationCaseToForm(c: DonationCase): DonationFormValues {
@@ -80,6 +103,10 @@ export function donationCaseToForm(c: DonationCase): DonationFormValues {
     category_ids: c.categories.map((cat) => cat.id),
     other_category: c.other_category ?? "",
     additional_notes: c.additional_notes ?? "",
+    donation_date: c.donation_date ?? "",
+    donation_type_ids: c.donation_types.map((t) => t.id),
+    cash_amount: c.cash_amount === null ? "" : String(c.cash_amount),
+    other_donation_type: c.other_donation_type ?? "",
   };
 }
 
@@ -106,5 +133,9 @@ export function donationFormToPayload(v: DonationFormValues) {
     category_ids: v.category_ids,
     other_category: emptyToNull(v.other_category),
     additional_notes: emptyToNull(v.additional_notes),
+    donation_date: emptyToNull(v.donation_date),
+    donation_type_ids: v.donation_type_ids,
+    cash_amount: parseAmount(v.cash_amount),
+    other_donation_type: emptyToNull(v.other_donation_type),
   };
 }

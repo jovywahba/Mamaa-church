@@ -54,6 +54,8 @@ All primary keys are UUIDs. Every table has `created_at`, and case tables also h
 | `donation_cases` | Main donation record (age **or** birth year for each parent, phones, الحالة من طرف, notes). |
 | `donation_children` | Children of a donation case (name, age or birth year, job). |
 | `donation_case_categories` | Many-to-many: donation case ↔ categories. |
+| `donation_types` | Lookup: «نوع التبرع» (نقدي, موبيليا أو أجهزة كهربائية, ملخصات أو أدوات مدرسية, …, تبرعات أخرى), seeded. |
+| `donation_case_types` | Many-to-many: donation case ↔ donation types. `donation_cases` also stores `donation_date`, `cash_amount` (required for نقدي), and `other_donation_type`. |
 
 **Search.** Each case keeps a denormalised, Arabic-normalised `search_text` column, which triggers maintain. It holds the names, children, phones, jobs, address, notes, referrer, and category labels, and a trigram (GIN) index covers it. The normalisation removes diacritics and unifies أ/إ/آ→ا, ة→ه, ى→ي, and Arabic-Indic digits→Latin. So a search for «ابراهيم» finds «إبراهيم», and a search for «٠١٠» finds «010». A multi-word query must match all of its words.
 
@@ -93,6 +95,7 @@ AUTH_EMAIL_DOMAIN=mamachurch.local   # internal domain used to map usernames to 
 | Migration | Adds |
 | --- | --- |
 | `20260927_family_service_history.sql` | Service date, expenses, and birth years for family records, plus the service-role-only `import_family_case` RPC |
+| `20261004_donation_type_and_date.sql` | Donation date (تاريخ التبرع), donation types (نوع التبرع, multi-select: نقدي with a required amount, plus 9 in-kind types and «تبرعات أخرى»), with filters and search |
 
 ## Importing historical family data (CSV)
 

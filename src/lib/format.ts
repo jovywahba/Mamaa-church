@@ -26,6 +26,11 @@ export function formatDateTime(value: string | null | undefined): string {
   return dateTimeFormatter.format(new Date(value));
 }
 
+/** Today's date in Cairo as YYYY-MM-DD (for date inputs). */
+export function todayIso(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE }).format(new Date());
+}
+
 export function currentYear(): number {
   return Number(new Intl.DateTimeFormat("en", { timeZone: TIME_ZONE, year: "numeric" }).format(new Date()));
 }

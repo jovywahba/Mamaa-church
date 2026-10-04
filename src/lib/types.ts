@@ -16,6 +16,9 @@ export type LookupOption = {
   is_other: boolean;
 };
 
+/** نوع التبرع — «نقدي» (is_cash) requires an amount. */
+export type DonationTypeOption = LookupOption & { is_cash: boolean };
+
 export type AuditPerson = { full_name: string; username: string } | null;
 
 // ---- خدمات الأسر ----
@@ -96,10 +99,14 @@ export type DonationCase = {
   referred_by: string | null;
   other_category: string | null;
   additional_notes: string | null;
+  donation_date: string | null;
+  cash_amount: number | null;
+  other_donation_type: string | null;
   created_at: string;
   updated_at: string;
   children: DonationChild[];
   categories: LookupOption[];
+  donation_types: DonationTypeOption[];
   creator: AuditPerson;
   updater: AuditPerson;
 };
@@ -113,6 +120,9 @@ export type DonationListRow = {
   referred_by: string | null;
   children_count: number;
   category_names: string[];
+  donation_date: string | null;
+  donation_type_names: string[];
+  cash_amount: number | null;
   created_at: string;
   total_count: number;
 };

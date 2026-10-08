@@ -22,9 +22,11 @@ type FamilyFormProps = {
   caseId?: string;
   defaultValues: FamilyFormValues;
   types: LookupOption[];
+  /** Existing servant / donor names, suggested while typing. */
+  servantNames: string[];
 };
 
-export function FamilyForm({ caseId, defaultValues, types }: FamilyFormProps) {
+export function FamilyForm({ caseId, defaultValues, types, servantNames }: FamilyFormProps) {
   const {
     register,
     control,
@@ -188,8 +190,21 @@ export function FamilyForm({ caseId, defaultValues, types }: FamilyFormProps) {
         ) : null}
       </SectionCard>
 
-      <SectionCard title="تاريخ الخدمة والمصاريف" icon={<CalendarDays />}>
-        <div className="grid gap-4 sm:grid-cols-2">
+      <SectionCard title="تفاصيل الخدمة" icon={<CalendarDays />}>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field
+            label="الخادم / المتبرع"
+            htmlFor="servant_name"
+            error={errors.servant_name?.message}
+            hint="الشخص الذي قام بالخدمة أو تبرع بها"
+          >
+            <Input id="servant_name" list="servant-names" autoComplete="off" {...register("servant_name")} invalid={!!errors.servant_name} />
+            <datalist id="servant-names">
+              {servantNames.map((n) => (
+                <option key={n} value={n} />
+              ))}
+            </datalist>
+          </Field>
           <Field label="تاريخ الخدمة" htmlFor="service_date" error={errors.service_date?.message}>
             <Input id="service_date" type="date" {...register("service_date")} invalid={!!errors.service_date} />
           </Field>

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Profile } from "@/lib/types";
 import { GlobalSearch } from "./global-search";
 import { Logo } from "./logo";
@@ -12,7 +13,9 @@ export function Topbar({ profile }: { profile: Profile }) {
         <div className="lg:hidden">
           <Logo compact />
         </div>
-        <GlobalSearch />
+        <Suspense fallback={<div className="h-10 w-full max-w-2xl rounded-lg bg-slate-50" />}>
+          <GlobalSearch />
+        </Suspense>
       </div>
     </header>
   );

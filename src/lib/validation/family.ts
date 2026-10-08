@@ -41,6 +41,7 @@ export const familyFormSchema = z
     notes: text(MAX_LONG_TEXT),
     type_ids: uuidList.min(1, "يرجى اختيار نوع مساعدة واحد على الأقل"),
     other_assistance: text(500),
+    servant_name: text(150),
     service_date: dateField("تاريخ الخدمة غير صحيح"),
     expense_amount: amountField(),
   })
@@ -65,6 +66,7 @@ export const emptyFamilyForm: FamilyFormValues = {
   notes: "",
   type_ids: [],
   other_assistance: "",
+  servant_name: "",
   service_date: "",
   expense_amount: "",
 };
@@ -87,6 +89,7 @@ export function familyCaseToForm(c: FamilyCase): FamilyFormValues {
     notes: c.notes ?? "",
     type_ids: c.types.map((t) => t.id),
     other_assistance: c.other_assistance ?? "",
+    servant_name: c.servant_name ?? "",
     service_date: c.service_date ?? "",
     expense_amount: c.expense_amount === null ? "" : String(c.expense_amount),
   };
@@ -116,6 +119,7 @@ export function familyFormToPayload(v: FamilyFormValues) {
     notes: emptyToNull(v.notes),
     type_ids: v.type_ids,
     other_assistance: emptyToNull(v.other_assistance),
+    servant_name: emptyToNull(v.servant_name.replace(/\s+/g, " ")),
     service_date: emptyToNull(v.service_date),
     expense_amount: parseAmount(v.expense_amount),
   };

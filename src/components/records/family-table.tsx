@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteFamilyCase } from "@/lib/actions/family";
+import Link from "next/link";
 import { familyTitle, formatDate, formatMoney, formatPlainDate } from "@/lib/format";
 import type { FamilyListRow } from "@/lib/types";
 import { BadgeList } from "@/components/ui/badge";
@@ -40,6 +41,23 @@ const columns: Column<FamilyListRow>[] = [
   { key: "address", header: "العنوان", className: "max-w-48", cell: (r) => (r.address ? <span className="line-clamp-2">{r.address}</span> : dash) },
   { key: "types", header: "نوع المساعدة", className: "max-w-56", cell: (r) => <BadgeList items={r.type_names} max={1} /> },
   {
+    key: "servant",
+    header: "الخادم / المتبرع",
+    className: "min-w-32",
+    cell: (r) =>
+      r.servant_name ? (
+        <Link
+          href={`/families?servant=${encodeURIComponent(r.servant_name)}`}
+          className="text-primary-700 hover:underline"
+          title="عرض كل خدمات هذا الشخص"
+        >
+          {r.servant_name}
+        </Link>
+      ) : (
+        dash
+      ),
+  },
+  {
     key: "service",
     header: "تاريخ الخدمة",
     className: "whitespace-nowrap",
@@ -74,6 +92,7 @@ export function FamilyTable({ rows }: { rows: FamilyListRow[] }) {
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
             <span>{r.children_count} أولاد</span>
             {r.phones[0] && <PhoneNumber value={r.phones[0]} withIcon />}
+            {r.servant_name && <span>الخادم: {r.servant_name}</span>}
             {r.service_date && <span>الخدمة: {formatPlainDate(r.service_date)}</span>}
             {r.expense_amount !== null && <span>{formatMoney(r.expense_amount)}</span>}
             <span>أضيفت: {formatDate(r.created_at)}</span>

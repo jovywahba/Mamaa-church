@@ -46,6 +46,8 @@ export type FamilyCase = {
   other_assistance: string | null;
   service_date: string | null;
   expense_amount: number | null;
+  /** «الخادم / المتبرع» — who carried out or funded the service. */
+  servant_name: string | null;
   /** Original "نوع الخدمة" wording for records imported from the old forms. */
   source_service_type: string | null;
   /** Original form submission time for imported records. */
@@ -67,10 +69,13 @@ export type FamilyListRow = {
   children_count: number;
   phones: string[];
   type_names: string[];
+  servant_name: string | null;
   service_date: string | null;
   expense_amount: number | null;
   created_at: string;
   total_count: number;
+  /** Sum of expense_amount over all rows matching the filters. */
+  total_expense: number | null;
 };
 
 // ---- التبرعات ----

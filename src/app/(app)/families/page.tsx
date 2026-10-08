@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { Plus, UsersRound } from "lucide-react";
+import Link from "next/link";
+import { HandHelping, Plus, UsersRound, X } from "lucide-react";
+import { formatMoney, servicesLabel } from "@/lib/format";
 import { requireUser } from "@/lib/auth";
 import { listFamilyCases, type FamilyFilters } from "@/lib/data/family";
 import { getFamilyAssistanceTypes } from "@/lib/data/lookups";
@@ -37,15 +39,17 @@ export default async function FamiliesPage(props: PageProps<"/families">) {
     service_to: spDate(sp, "sto"),
     expense_min: spInt(sp, "emin", 9),
     expense_max: spInt(sp, "emax", 9),
+    servant_name: spString(sp, "servant"),
   };
 
-  const [types, { rows, total }] = await Promise.all([getFamilyAssistanceTypes(), listFamilyCases(filters, page)]);
+  const [types, { rows, total, totalExpense }] = await Promise.all([getFamilyAssistanceTypes(), listFamilyCases(filters, page)]);
 
   const fields: FilterField[] = [
     { name: "types", label: "نوع المساعدة", type: "multi", options: types.map((t) => ({ value: t.id, label: t.name_ar })) },
     { name: "service", label: "تاريخ الخدمة", type: "date-range", fromName: "sfrom", toName: "sto" },
     { name: "expense", label: "المصاريف (جنيه)", type: "number-range", minName: "emin", maxName: "emax", maxDigits: 9 },
     { name: "date", label: "تاريخ الإضافة", type: "date-range", fromName: "from", toName: "to" },
+    { name: "servant", label: "الخادم / المتبرع", type: "text" },
     { name: "father", label: "اسم الأب", type: "text" },
     { name: "mother", label: "اسم الأم", type: "text" },
     { name: "address", label: "المنطقة / العنوان", type: "text" },
@@ -70,8 +74,32 @@ export default async function FamiliesPage(props: PageProps<"/families">) {
           </LinkButton>
         }
       />
+      {filters.servant_name && (
+        <div className="mb-4 flex flex-col gap-3 rounded-xl border border-primary-100 bg-primary-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-lg bg-white text-primary-700 ring-1 ring-primary-100">
+              <HandHelping className="size-5" aria-hidden />
+            </span>
+            <div>
+              <p className="font-bold text-primary-900">خدمات «{filters.servant_name}»</p>
+              <p className="text-sm text-primary-800">
+                <span className="font-semibold tabular-nums">{servicesLabel(total)}</span>
+                {totalExpense !== null && (
+                  <>
+                    {" "}• إجمالي المصاريف <span className="font-semibold tabular-nums">{formatMoney(totalExpense)}</span>
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+          <Link href="/families" className="inline-flex items-center gap-1 text-sm font-semibold text-primary-700 hover:underline">
+            <X className="size-4" aria-hidden />
+            عرض كل الأسر
+          </Link>
+        </div>
+      )}
       <Card className="overflow-visible">
-        <FilterPanel fields={fields} searchPlaceholder="ابحث باسم الأب أو الأم أو الأولاد، رقم الهاتف، العنوان، الملاحظات..." />
+        <FilterPanel fields={fields} searchPlaceholder="ابحث باسم الأب أو الأم أو الأولاد أو الخادم / المتبرع، رقم الهاتف، العنوان..." />
         {rows.length === 0 ? (
           filtered ? (
             <EmptyState title="لا توجد نتائج مطابقة" description="جرّب تعديل كلمات البحث أو مسح الفلاتر." />

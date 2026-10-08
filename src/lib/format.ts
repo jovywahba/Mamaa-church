@@ -86,3 +86,12 @@ export function formatPlainDate(value: string | null | undefined): string {
     new Date(Date.UTC(y, m - 1, d)),
   );
 }
+
+/** Arabic counting for services: خدمة واحدة، خدمتان، 3–10 خدمات، 11+ خدمة. */
+export function servicesLabel(n: number): string {
+  if (n === 0) return "لا توجد خدمات";
+  if (n === 1) return "خدمة واحدة";
+  if (n === 2) return "خدمتان";
+  if (n >= 3 && n <= 10) return `${n} خدمات`;
+  return `${n} خدمة`;
+}

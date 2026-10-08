@@ -324,6 +324,12 @@ begin
 end;
 $$;
 
+-- Servant / donor of the service (added 2026-10)
+alter table public.family_assistance_cases
+  add column if not exists servant_name text;
+create index if not exists family_cases_servant_trgm_idx
+  on public.family_assistance_cases using gin (servant_name gin_trgm_ops);
+
 create unique index if not exists family_cases_import_key_uidx
   on public.family_assistance_cases (import_key) where import_key is not null;
 create index if not exists family_cases_service_date_idx on public.family_assistance_cases (service_date desc);
@@ -449,7 +455,7 @@ set search_path = ''
 as $$
   select public.normalize_ar(concat_ws(' ',
     c.father_name, c.father_job, c.mother_name, c.mother_job,
-    c.address, c.notes, c.other_assistance, c.source_service_type,
+    c.address, c.notes, c.other_assistance, c.source_service_type, c.servant_name,
     (select string_agg(concat_ws(' ', ch.name, ch.education_stage), ' ')
        from public.family_assistance_children ch where ch.case_id = c.id),
     (select string_agg(ph.phone, ' ')
@@ -622,7 +628,8 @@ begin
     notes             = nullif(btrim(p_data ->> 'notes'), ''),
     other_assistance  = nullif(btrim(p_data ->> 'other_assistance'), ''),
     service_date      = nullif(p_data ->> 'service_date', '')::date,
-    expense_amount    = nullif(p_data ->> 'expense_amount', '')::numeric
+    expense_amount    = nullif(p_data ->> 'expense_amount', '')::numeric,
+    servant_name      = nullif(regexp_replace(btrim(p_data ->> 'servant_name'), '\s+', ' ', 'g'), '')
   where id = v_id;
 
   return v_id;
@@ -729,7 +736,8 @@ $$;
 --   q, type_ids[], date_from, date_to (YYYY-MM-DD, Cairo time),
 --   father_name, mother_name, address,
 --   parent_age_min, parent_age_max, child_age_min, child_age_max, education_stage,
---   service_from, service_to (تاريخ الخدمة), expense_min, expense_max (المصاريف)
+--   service_from, service_to (تاريخ الخدمة), expense_min, expense_max (المصاريف),
+--   servant_name (الخادم / المتبرع)
 drop function if exists public.list_family_cases(jsonb, integer, integer);
 
 create function public.list_family_cases(
@@ -745,10 +753,12 @@ returns table (
   children_count integer,
   phones text[],
   type_names text[],
+  servant_name text,
   service_date date,
   expense_amount numeric,
   created_at timestamptz,
-  total_count bigint
+  total_count bigint,
+  total_expense numeric
 )
 language plpgsql
 stable
@@ -772,6 +782,7 @@ declare
   v_cmin         int  := nullif(p_filters ->> 'child_age_min', '')::int;
   v_cmax         int  := nullif(p_filters ->> 'child_age_max', '')::int;
   v_stage        text := nullif(btrim(p_filters ->> 'education_stage'), '');
+  v_servant      text := nullif(btrim(public.normalize_ar(p_filters ->> 'servant_name')), '');
   v_year         int  := extract(year from (now() at time zone 'Africa/Cairo'))::int;
 begin
   if jsonb_typeof(p_filters -> 'type_ids') = 'array' and jsonb_array_length(p_filters -> 'type_ids') > 0 then
@@ -791,10 +802,12 @@ begin
                 from public.family_assistance_case_types ct
                 join public.family_assistance_types t on t.id = ct.type_id
                where ct.case_id = c.id), '{}'),
+    c.servant_name,
     c.service_date,
     c.expense_amount,
     c.created_at,
-    count(*) over ()
+    count(*) over (),
+    sum(c.expense_amount) over ()
   from public.family_assistance_cases c
   where (v_patterns is null or (c.search_text like v_patterns[1] and c.search_text like all (v_patterns)))
     and (v_type_ids is null or exists (
@@ -809,6 +822,7 @@ begin
     and (v_father  is null or public.normalize_ar(c.father_name) like '%' || v_father || '%')
     and (v_mother  is null or public.normalize_ar(c.mother_name) like '%' || v_mother || '%')
     and (v_address is null or public.normalize_ar(c.address) like '%' || v_address || '%')
+    and (v_servant is null or public.normalize_ar(c.servant_name) like '%' || v_servant || '%')
     -- parent age: use the stored age, or derive it from the birth year
     and ((v_pmin is null and v_pmax is null)
          or coalesce(c.father_age, v_year - c.father_birth_year) between coalesce(v_pmin, 0) and coalesce(v_pmax, 200)

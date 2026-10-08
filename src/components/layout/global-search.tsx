@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { HandHeart, Loader2, Search, UsersRound } from "lucide-react";
 import { quickSearch } from "@/lib/actions/search";
 import { familyTitle } from "@/lib/format";
@@ -13,8 +13,33 @@ export function resultHref(r: Pick<SearchResult, "kind" | "id">) {
   return r.kind === "family" ? `/families/${r.id}` : `/donations/${r.id}`;
 }
 
+type Kind = SearchResult["kind"];
+
+const SCOPES: { kind: Kind; label: string; placeholder: string }[] = [
+  { kind: "family", label: "خدمات الأسر", placeholder: "ابحث في خدمات الأسر: الاسم، الخادم، الهاتف..." },
+  { kind: "donation", label: "التبرعات", placeholder: "ابحث في التبرعات: الاسم، الهاتف، نوع التبرع..." },
+];
+
+/** The section that matches the current page (search defaults to it). */
+function kindForPage(pathname: string, kindParam: string | null): Kind {
+  if (pathname.startsWith("/donations")) return "donation";
+  if (pathname.startsWith("/search") && kindParam === "donation") return "donation";
+  return "family";
+}
+
 export function GlobalSearch() {
   const router = useRouter();
+  const pathname = usePathname();
+  const kindParam = useSearchParams().get("kind");
+  const pageKind = kindForPage(pathname, kindParam);
+  const [kind, setKind] = useState<Kind>(pageKind);
+  // Follow the section the user navigates to.
+  const [lastPageKind, setLastPageKind] = useState(pageKind);
+  if (pageKind !== lastPageKind) {
+    setLastPageKind(pageKind);
+    setKind(pageKind);
+  }
+  const scope = SCOPES.find((s) => s.kind === kind)!;
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
@@ -31,7 +56,7 @@ export function GlobalSearch() {
     const id = ++requestId.current;
     const timer = setTimeout(() => {
       startTransition(async () => {
-        const data = await quickSearch(q);
+        const data = await quickSearch(q, kind);
         if (id === requestId.current) {
           setResults(data);
           setActive(-1);
@@ -39,7 +64,7 @@ export function GlobalSearch() {
       });
     }, 250);
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, kind]);
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
@@ -60,7 +85,7 @@ export function GlobalSearch() {
     e.preventDefault();
     if (active >= 0 && results[active]) return go(resultHref(results[active]));
     const q = query.trim();
-    if (q) go(`/search?q=${encodeURIComponent(q)}`);
+    if (q) go(`/search?q=${encodeURIComponent(q)}&kind=${kind}`);
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
@@ -77,8 +102,28 @@ export function GlobalSearch() {
   }
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-xl">
-      <form role="search" onSubmit={onSubmit}>
+    <div ref={containerRef} className="relative flex w-full max-w-2xl items-center gap-2">
+      <div role="radiogroup" aria-label="مكان البحث" className="hidden shrink-0 rounded-lg bg-slate-100 p-1 sm:flex">
+        {SCOPES.map((s) => (
+          <button
+            key={s.kind}
+            type="button"
+            role="radio"
+            aria-checked={kind === s.kind}
+            onClick={() => {
+              setKind(s.kind);
+              setResults([]);
+            }}
+            className={cn(
+              "cursor-pointer rounded-md px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors",
+              kind === s.kind ? "bg-white text-primary-800 shadow-sm" : "text-slate-500 hover:text-slate-800",
+            )}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+      <form role="search" onSubmit={onSubmit} className="relative w-full">
         <label htmlFor="global-search" className="sr-only">
           بحث شامل
         </label>
@@ -94,7 +139,7 @@ export function GlobalSearch() {
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
-          placeholder="ابحث بالاسم، رقم الهاتف، العنوان..."
+          placeholder={scope.placeholder}
           role="combobox"
           aria-expanded={showDropdown}
           aria-controls={listId}
@@ -110,7 +155,7 @@ export function GlobalSearch() {
         <div
           id={listId}
           role="listbox"
-          className="absolute inset-x-0 z-40 mt-1.5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+          className="absolute inset-x-0 top-full z-40 mt-1.5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
         >
           {results.length === 0 ? (
             <p className="px-4 py-5 text-center text-sm text-slate-500">
@@ -156,10 +201,10 @@ export function GlobalSearch() {
           )}
           <button
             type="button"
-            onClick={() => go(`/search?q=${encodeURIComponent(query.trim())}`)}
+            onClick={() => go(`/search?q=${encodeURIComponent(query.trim())}&kind=${kind}`)}
             className="block w-full cursor-pointer border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-center text-sm font-semibold text-primary-700 hover:bg-slate-100"
           >
-            عرض كل النتائج لـ &quot;{query.trim()}&quot;
+            عرض كل نتائج {scope.label} لـ &quot;{query.trim()}&quot;
           </button>
         </div>
       )}

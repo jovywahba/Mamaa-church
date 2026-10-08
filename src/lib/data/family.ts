@@ -21,6 +21,7 @@ export type FamilyFilters = {
   service_to?: string;
   expense_min?: string;
   expense_max?: string;
+  servant_name?: string;
 };
 
 export async function listFamilyCases(filters: FamilyFilters, page: number) {
@@ -35,13 +36,18 @@ export async function listFamilyCases(filters: FamilyFilters, page: number) {
     ...r,
     expense_amount: r.expense_amount === null ? null : Number(r.expense_amount),
   }));
-  return { rows, total: rows[0]?.total_count ?? 0 };
+  const totalExpense = rows[0]?.total_expense;
+  return {
+    rows,
+    total: rows[0]?.total_count ?? 0,
+    totalExpense: totalExpense === null || totalExpense === undefined ? null : Number(totalExpense),
+  };
 }
 
 const DETAIL_SELECT = `
   id, father_name, father_age, father_birth_year, father_job,
   mother_name, mother_age, mother_birth_year, mother_job,
-  address, notes, other_assistance, service_date, expense_amount,
+  address, notes, other_assistance, service_date, expense_amount, servant_name,
   source_service_type, source_recorded_at, created_at, updated_at,
   children:family_assistance_children(id, name, age, birth_year, education_stage, sort_order),
   phones:family_assistance_phones(id, phone, sort_order),
@@ -74,4 +80,17 @@ export async function getFamilyCase(id: string): Promise<FamilyCase | null> {
       .filter((t): t is LookupOption => Boolean(t))
       .sort((a, b) => a.sort_order - b.sort_order),
   };
+}
+
+/** Distinct servant / donor names already used, for form suggestions. */
+export async function getServantNames(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("family_assistance_cases")
+    .select("servant_name")
+    .not("servant_name", "is", null)
+    .limit(5000);
+  if (error) throw error;
+  const names = new Set((data ?? []).map((r) => (r.servant_name as string).trim()).filter(Boolean));
+  return [...names].sort((a, b) => a.localeCompare(b, "ar"));
 }

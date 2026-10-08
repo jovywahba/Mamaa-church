@@ -5,7 +5,7 @@ An internal, Arabic-only (RTL) web application for managing the church charity's
 1. **خدمات من يديك أعطيناك إلى الأسر**: families receiving assistance (father, mother, any number of children, address, several phone numbers, assistance types, notes).
 2. **التبرعات إلى من يديك أعطيناك**: donation cases (father, mother, children, phone numbers, الحالة من طرف, المساعدة موجهة إلى, notes).
 
-Features: secure login, dashboard, full create / view / edit / delete for both sections, repeatable children rows, multi-select categories, global Arabic-aware search, combinable filters, pagination, detailed record pages with audit info (created/updated at and by), admin user management, loading / empty / error states, and a responsive layout for desktop, tablet, and mobile.
+Features: secure login, dashboard, full create / view / edit / delete for both sections, «الخادم / المتبرع» on family services (all services of a person, with totals), separate search for each section, repeatable children rows, multi-select categories, global Arabic-aware search, combinable filters, pagination, detailed record pages with audit info (created/updated at and by), admin user management, loading / empty / error states, and a responsive layout for desktop, tablet, and mobile.
 
 ## Technology stack
 
@@ -57,7 +57,7 @@ All primary keys are UUIDs. Every table has `created_at`, and case tables also h
 | `donation_types` | Lookup: «نوع التبرع» (نقدي, موبيليا أو أجهزة كهربائية, ملخصات أو أدوات مدرسية, …, تبرعات أخرى), seeded. |
 | `donation_case_types` | Many-to-many: donation case ↔ donation types. `donation_cases` also stores `donation_date`, `cash_amount` (required for نقدي), and `other_donation_type`. |
 
-**Search.** Each case keeps a denormalised, Arabic-normalised `search_text` column, which triggers maintain. It holds the names, children, phones, jobs, address, notes, referrer, and category labels, and a trigram (GIN) index covers it. The normalisation removes diacritics and unifies أ/إ/آ→ا, ة→ه, ى→ي, and Arabic-Indic digits→Latin. So a search for «ابراهيم» finds «إبراهيم», and a search for «٠١٠» finds «010». A multi-word query must match all of its words.
+**Search.** The two sections are searched **separately**: the top-bar search has a «خدمات الأسر / التبرعات» switch, which defaults to the section you're in, and the search page has one tab per section. Each case keeps a denormalised, Arabic-normalised `search_text` column, which triggers maintain. It holds the names, children, phones, jobs, address, notes, referrer, and category labels, and a trigram (GIN) index covers it. The normalisation removes diacritics and unifies أ/إ/آ→ا, ة→ه, ى→ي, and Arabic-Indic digits→Latin. So a search for «ابراهيم» finds «إبراهيم», and a search for «٠١٠» finds «010». A multi-word query must match all of its words.
 
 **RPC functions** (all `SECURITY INVOKER`, so RLS always applies):
 `save_family_case`, `save_donation_case` (atomic create/update of a case with its children/phones/categories), `list_family_cases`, `list_donation_cases` (filters + pagination + total count), and `global_search`.
@@ -96,6 +96,7 @@ AUTH_EMAIL_DOMAIN=mamachurch.local   # internal domain used to map usernames to 
 | --- | --- |
 | `20260927_family_service_history.sql` | Service date, expenses, and birth years for family records, plus the service-role-only `import_family_case` RPC |
 | `20261004_donation_type_and_date.sql` | Donation date (تاريخ التبرع), donation types (نوع التبرع, multi-select: نقدي with a required amount, plus 9 in-kind types and «تبرعات أخرى»), with filters and search |
+| `20261008_family_servant_name.sql` | «الخادم / المتبرع» (`servant_name`) on family services: shows all services of a person, with a count and total expenses |
 
 ## Importing historical family data (CSV)
 

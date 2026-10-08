@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft, HandHeart, Search, UsersRound } from "lucide-react";
 import { requireUser } from "@/lib/auth";
-import { globalSearch } from "@/lib/data/search";
+import { globalSearch, parseSearchKind } from "@/lib/data/search";
+import { SECTION_LABELS } from "@/lib/constants";
 import { familyTitle, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -19,18 +20,21 @@ export default async function SearchPage(props: PageProps<"/search">) {
   await requireUser();
   const sp = await props.searchParams;
   const q = spString(sp, "q") ?? "";
-  const kind = spString(sp, "kind");
-  const all = q ? await globalSearch(q, 100) : [];
-  const results = kind === "family" || kind === "donation" ? all.filter((r) => r.kind === kind) : all;
-  const counts = { family: all.filter((r) => r.kind === "family").length, donation: all.filter((r) => r.kind === "donation").length };
+  // خدمات الأسر and التبرعات are searched separately — never a mixed list.
+  const kind = parseSearchKind(spString(sp, "kind"));
+  const [familyResults, donationResults] = q
+    ? await Promise.all([globalSearch(q, "family", 100), globalSearch(q, "donation", 100)])
+    : [[], []];
+  const results = kind === "family" ? familyResults : donationResults;
+  const counts = { family: familyResults.length, donation: donationResults.length };
 
-  const tab = (value: string | undefined, label: string, count: number) => {
-    const params = new URLSearchParams({ q });
-    if (value) params.set("kind", value);
-    const active = (kind ?? undefined) === value;
+  const tab = (value: "family" | "donation", label: string, count: number) => {
+    const params = new URLSearchParams({ q, kind: value });
+    const active = kind === value;
     return (
       <Link
         href={`/search?${params}`}
+        aria-current={active ? "page" : undefined}
         className={cn(
           "rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors",
           active ? "bg-primary-700 text-white" : "text-slate-600 hover:bg-slate-100",
@@ -45,17 +49,18 @@ export default async function SearchPage(props: PageProps<"/search">) {
     <>
       <PageHeader
         title="البحث الشامل"
-        description="ابحث في جميع السجلات: الأسماء، الأولاد، أرقام الهاتف، العنوان، العمل، نوع المساعدة، الملاحظات، الحالة من طرف..."
+        description="البحث منفصل لكل قسم: اختر خدمات الأسر أو التبرعات. ابحث بالأسماء، الأولاد، الخادم / المتبرع، أرقام الهاتف، العنوان، نوع المساعدة، الملاحظات..."
         icon={<Search />}
         breadcrumbs={[{ label: "الرئيسية", href: "/" }, { label: "البحث" }]}
       />
 
       <Card className="mb-6 p-4">
         <form action="/search" className="flex flex-col gap-2 sm:flex-row" role="search">
+          <input type="hidden" name="kind" value={kind} />
           <label htmlFor="search-page-q" className="sr-only">
             كلمات البحث
           </label>
-          <Input id="search-page-q" name="q" type="search" defaultValue={q} placeholder="ابحث بالاسم، رقم الهاتف، العنوان..." autoFocus={!q} className="h-11 text-base" />
+          <Input id="search-page-q" name="q" type="search" defaultValue={q} placeholder={kind === "family" ? "ابحث في خدمات الأسر..." : "ابحث في التبرعات..."} autoFocus={!q} className="h-11 text-base" />
           <Button type="submit" size="lg" className="h-11">
             <Search className="size-4" aria-hidden />
             بحث
@@ -70,12 +75,14 @@ export default async function SearchPage(props: PageProps<"/search">) {
       ) : (
         <Card className="overflow-hidden">
           <div className="flex flex-wrap items-center gap-1 border-b border-slate-100 p-3">
-            {tab(undefined, "الكل", all.length)}
-            {tab("family", "خدمات الأسر", counts.family)}
-            {tab("donation", "التبرعات", counts.donation)}
+            {tab("family", SECTION_LABELS.family, counts.family)}
+            {tab("donation", SECTION_LABELS.donation, counts.donation)}
           </div>
           {results.length === 0 ? (
-            <EmptyState title="لا توجد نتائج مطابقة" description={`لم يتم العثور على نتائج لـ "${q}". جرّب كلمات أخرى أو جزءاً من الاسم.`} />
+            <EmptyState
+              title="لا توجد نتائج مطابقة"
+              description={`لم يتم العثور على نتائج لـ "${q}" في ${kind === "family" ? "خدمات الأسر" : "التبرعات"}. جرّب كلمات أخرى، أو ابحث في القسم الآخر.`}
+            />
           ) : (
             <ul className="divide-y divide-slate-100">
               {results.map((r) => {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, CalendarDays, HandHelping, MapPin, NotebookPen, Pencil, Phone, User, UserRound, UsersRound } from "lucide-react";
 import { requireUser } from "@/lib/auth";
@@ -140,8 +141,19 @@ export default async function FamilyDetailPage(props: PageProps<"/families/[id]"
           )}
         </SectionCard>
 
-        <SectionCard title="تاريخ الخدمة والمصاريف" icon={<CalendarDays />}>
-          <InfoGrid cols={2}>
+        <SectionCard title="تفاصيل الخدمة" icon={<CalendarDays />}>
+          <InfoGrid cols={3}>
+            <InfoItem label="الخادم / المتبرع">
+              {record.servant_name ? (
+                <Link
+                  href={`/families?servant=${encodeURIComponent(record.servant_name)}`}
+                  className="text-primary-700 underline-offset-4 hover:underline"
+                  title="عرض كل خدمات هذا الشخص"
+                >
+                  {record.servant_name}
+                </Link>
+              ) : null}
+            </InfoItem>
             <InfoItem label="تاريخ الخدمة">{record.service_date ? formatPlainDate(record.service_date) : null}</InfoItem>
             <InfoItem label="المصاريف">{record.expense_amount !== null ? formatMoney(record.expense_amount) : null}</InfoItem>
           </InfoGrid>

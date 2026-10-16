@@ -34,9 +34,13 @@ export function DataTable<T>({ rows, columns, rowKey, rowHref, mobileCard }: Dat
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/80">
+            <tr className="border-b border-slate-200 bg-slate-50">
               {columns.map((c) => (
-                <th key={c.key} scope="col" className={cn("px-4 py-3 text-start text-xs font-bold whitespace-nowrap text-slate-500", c.className)}>
+                <th
+                  key={c.key}
+                  scope="col"
+                  className={cn("px-4 py-3 text-start text-xs font-bold tracking-wide whitespace-nowrap text-slate-600", c.className)}
+                >
                   {c.header}
                 </th>
               ))}
@@ -44,9 +48,21 @@ export function DataTable<T>({ rows, columns, rowKey, rowHref, mobileCard }: Dat
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows.map((row) => (
-              <tr key={rowKey(row)} onClick={(e) => onRowClick(e, row)} className="cursor-pointer transition-colors hover:bg-slate-50">
-                {columns.map((c) => (
-                  <td key={c.key} className={cn("px-4 py-3 align-middle text-slate-700", c.className)}>
+              <tr
+                key={rowKey(row)}
+                onClick={(e) => onRowClick(e, row)}
+                className="group cursor-pointer transition-colors odd:bg-white even:bg-slate-50/40 hover:bg-primary-50/50"
+              >
+                {columns.map((c, i) => (
+                  <td
+                    key={c.key}
+                    className={cn(
+                      "px-4 py-3.5 align-middle leading-6 text-slate-700",
+                      // Accent on the leading (right, in RTL) edge of the hovered row.
+                      i === 0 && "shadow-[inset_-3px_0_0_transparent] transition-shadow group-hover:shadow-[inset_-3px_0_0_var(--color-primary-500)]",
+                      c.className,
+                    )}
+                  >
                     {c.cell(row)}
                   </td>
                 ))}
@@ -57,7 +73,11 @@ export function DataTable<T>({ rows, columns, rowKey, rowHref, mobileCard }: Dat
       </div>
       <ul className="divide-y divide-slate-100 md:hidden">
         {rows.map((row) => (
-          <li key={rowKey(row)} onClick={(e) => onRowClick(e, row)} className="cursor-pointer p-4 active:bg-slate-50">
+          <li
+            key={rowKey(row)}
+            onClick={(e) => onRowClick(e, row)}
+            className="cursor-pointer px-4 py-4 transition-colors hover:bg-slate-50 active:bg-primary-50/60"
+          >
             {mobileCard(row)}
           </li>
         ))}

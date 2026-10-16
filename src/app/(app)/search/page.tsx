@@ -89,7 +89,7 @@ export default async function SearchPage(props: PageProps<"/search">) {
                 const href = r.kind === "family" ? `/families/${r.id}` : `/donations/${r.id}`;
                 return (
                   <li key={`${r.kind}-${r.id}`}>
-                    <Link href={href} className="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-slate-50 sm:px-5">
+                    <Link href={href} className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-slate-50 active:bg-primary-50/60 sm:gap-4 sm:px-5 sm:py-3.5">
                       <span
                         className={cn(
                           "flex size-10 shrink-0 items-center justify-center rounded-xl",
@@ -105,9 +105,10 @@ export default async function SearchPage(props: PageProps<"/search">) {
                             {r.kind === "family" ? "خدمات الأسر" : "التبرعات"}
                           </Badge>
                         </span>
-                        <span className="mt-0.5 block truncate text-sm text-slate-500">
+                        <span className="mt-0.5 block truncate text-sm leading-6 text-slate-500">
                           {[r.father_name && r.mother_name ? `الأم: ${r.mother_name}` : null, r.details].filter(Boolean).join(" • ") || "—"}
                         </span>
+                        <span className="mt-0.5 block text-xs text-slate-400 sm:hidden">{formatDate(r.created_at)}</span>
                       </span>
                       <span className="hidden text-xs whitespace-nowrap text-slate-400 sm:block">{formatDate(r.created_at)}</span>
                       <ChevronLeft className="size-4 shrink-0 text-slate-300" aria-hidden />

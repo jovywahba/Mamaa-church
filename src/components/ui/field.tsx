@@ -14,7 +14,7 @@ type FieldProps = {
 export function Field({ label, htmlFor, error, hint, required, className, children }: FieldProps) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label htmlFor={htmlFor} className="block text-sm font-semibold text-slate-700">
+      <label htmlFor={htmlFor} className="block text-[13px] leading-5 font-semibold text-slate-700">
         {label}
         {required && (
           <span className="ms-1 text-red-500" aria-hidden>

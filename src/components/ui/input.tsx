@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export const inputBase =
   "block w-full rounded-lg border bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 " +
-  "transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 " +
+  "transition-colors hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 " +
   "disabled:bg-slate-100 disabled:text-slate-500";
 
 export const inputBorder = (invalid?: boolean) =>

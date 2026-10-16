@@ -23,8 +23,9 @@ const sizes: Record<Size, string> = {
 
 export function buttonClasses(variant: Variant = "primary", size: Size = "md", className?: string) {
   return cn(
-    "inline-flex shrink-0 items-center justify-center rounded-lg font-semibold transition-colors",
-    "disabled:pointer-events-none disabled:opacity-60 cursor-pointer whitespace-nowrap",
+    "inline-flex shrink-0 items-center justify-center rounded-lg font-semibold transition-[color,background-color,box-shadow,transform] duration-150",
+    "active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2",
+    "disabled:pointer-events-none disabled:opacity-60 cursor-pointer whitespace-nowrap [&_svg]:shrink-0",
     variants[variant],
     sizes[size],
     className,

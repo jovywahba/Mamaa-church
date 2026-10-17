@@ -20,6 +20,14 @@
   body {
     @apply bg-slate-50 text-slate-800 antialiased;
     font-feature-settings: "kern";
+    /* Long unbroken strings (names, phone runs, URLs) wrap instead of overflowing on phones. */
+    overflow-wrap: break-word;
+  }
+  h1,
+  h2,
+  h3 {
+    /* Avoid a single orphaned word on the last line of long Arabic titles. */
+    text-wrap: balance;
   }
   ::selection {
     @apply bg-primary-100 text-primary-900;

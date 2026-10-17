@@ -18,7 +18,7 @@ type SectionCardProps = {
 export function SectionCard({ title, icon, description, actions, className, bodyClassName, children }: SectionCardProps) {
   return (
     <Card className={className}>
-      <div className="flex items-center justify-between gap-3 rounded-t-xl border-b border-slate-100 bg-slate-50/50 px-5 py-3.5">
+      <div className="flex items-center justify-between gap-3 rounded-t-xl border-b border-slate-100 bg-slate-50/50 px-4 py-3.5 sm:px-5">
         <div className="flex items-center gap-3">
           {icon && (
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-primary-600 ring-1 ring-slate-200 [&>svg]:size-4.5">
@@ -32,7 +32,7 @@ export function SectionCard({ title, icon, description, actions, className, body
         </div>
         {actions}
       </div>
-      <div className={cn("p-5", bodyClassName)}>{children}</div>
+      <div className={cn("p-4 sm:p-5", bodyClassName)}>{children}</div>
     </Card>
   );
 }

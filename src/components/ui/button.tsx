@@ -18,14 +18,15 @@ const sizes: Record<Size, string> = {
   sm: "h-8 px-3 text-sm gap-1.5",
   md: "h-10 px-4 text-sm gap-2",
   lg: "h-12 px-6 text-base gap-2",
-  icon: "h-9 w-9",
+  icon: "size-10",
 };
 
 export function buttonClasses(variant: Variant = "primary", size: Size = "md", className?: string) {
   return cn(
     "inline-flex shrink-0 items-center justify-center rounded-lg font-semibold transition-[color,background-color,box-shadow,transform] duration-150",
     "active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2",
-    "disabled:pointer-events-none disabled:opacity-60 cursor-pointer whitespace-nowrap [&_svg]:shrink-0",
+    "disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none aria-busy:opacity-80 cursor-pointer whitespace-nowrap",
+    "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
     variants[variant],
     sizes[size],
     className,

@@ -50,8 +50,8 @@ export default async function FamilyDetailPage(props: PageProps<"/families/[id]"
         }
       />
 
-      <div className="space-y-6">
-        <div className="grid gap-6 lg:grid-cols-2">
+      <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
           <SectionCard title="بيانات الأب" icon={<User />}>
             <InfoGrid>
               <InfoItem label="الاسم">{record.father_name}</InfoItem>
@@ -102,7 +102,7 @@ export default async function FamilyDetailPage(props: PageProps<"/families/[id]"
           )}
         </SectionCard>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
           <SectionCard title="أرقام التواصل" icon={<Phone />}>
             {record.phones.length === 0 ? (
               <p className="text-sm text-slate-400">لا توجد أرقام مسجلة</p>

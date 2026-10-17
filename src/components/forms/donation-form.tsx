@@ -49,8 +49,8 @@ export function DonationForm({ caseId, defaultValues, categories, donationTypes 
   const onSubmit = (values: DonationFormValues) => save(() => saveDonationCase(caseId ?? null, values));
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalidToast)} className="space-y-6" noValidate>
-      <div className="grid gap-6 lg:grid-cols-2">
+    <form onSubmit={handleSubmit(onSubmit, onInvalidToast)} className="space-y-4 sm:space-y-5 lg:space-y-6" noValidate>
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
         <SectionCard title="بيانات الأب" icon={<User />}>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="اسم الأب" htmlFor="father_name" error={errors.father_name?.message} className="sm:col-span-2" required>

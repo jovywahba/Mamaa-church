@@ -75,7 +75,7 @@ export default async function FamiliesPage(props: PageProps<"/families">) {
         }
       />
       {filters.servant_name && (
-        <div className="mb-4 flex flex-col gap-3 rounded-xl border border-primary-100 bg-primary-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-5 flex flex-col gap-3 rounded-xl border border-primary-100 bg-primary-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-lg bg-white text-primary-700 ring-1 ring-primary-100">
               <HandHelping className="size-5" aria-hidden />

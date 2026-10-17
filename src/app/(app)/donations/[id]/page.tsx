@@ -51,8 +51,8 @@ export default async function DonationDetailPage(props: PageProps<"/donations/[i
         }
       />
 
-      <div className="space-y-6">
-        <div className="grid gap-6 lg:grid-cols-2">
+      <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
           <SectionCard title="بيانات الأب" icon={<User />}>
             <InfoGrid>
               <InfoItem label="الاسم">{record.father_name}</InfoItem>
@@ -103,7 +103,7 @@ export default async function DonationDetailPage(props: PageProps<"/donations/[i
           )}
         </SectionCard>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
           <SectionCard title="أرقام التواصل" icon={<Phone />}>
             <InfoGrid cols={2}>
               <InfoItem label="رقم موبايل الأب">
@@ -162,7 +162,7 @@ export default async function DonationDetailPage(props: PageProps<"/donations/[i
           )}
         </SectionCard>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
           <SectionCard title="الملاحظات" icon={<NotebookPen />}>
             <MultilineText value={record.notes} />
           </SectionCard>

@@ -50,8 +50,8 @@ export default async function FamilyDetailPage(props: PageProps<"/families/[id]"
         }
       />
 
-      <div className="space-y-6">
-        <div className="grid gap-6 lg:grid-cols-2">
+      <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
           <SectionCard title="بيانات الأب" icon={<User />}>
             <InfoGrid>
               <InfoItem label="الاسم">{record.father_name}</InfoItem>
@@ -80,7 +80,7 @@ export default async function FamilyDetailPage(props: PageProps<"/families/[id]"
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/80 text-xs text-slate-500">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-xs tracking-wide text-slate-600">
                     <th className="w-12 px-5 py-2.5 text-start font-bold">#</th>
                     <th className="px-5 py-2.5 text-start font-bold">الاسم</th>
                     <th className="px-5 py-2.5 text-start font-bold">العمر أو سنة الميلاد</th>
@@ -89,7 +89,7 @@ export default async function FamilyDetailPage(props: PageProps<"/families/[id]"
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {record.children.map((ch, i) => (
-                    <tr key={ch.id}>
+                    <tr key={ch.id} className="leading-6 transition-colors hover:bg-slate-50/70">
                       <td className="px-5 py-3 text-slate-400 tabular-nums">{i + 1}</td>
                       <td className="px-5 py-3 font-semibold text-slate-900">{ch.name}</td>
                       <td className="px-5 py-3 text-slate-700">{formatAgeOrBirthYear(ch.age, ch.birth_year)}</td>
@@ -102,7 +102,7 @@ export default async function FamilyDetailPage(props: PageProps<"/families/[id]"
           )}
         </SectionCard>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
           <SectionCard title="أرقام التواصل" icon={<Phone />}>
             {record.phones.length === 0 ? (
               <p className="text-sm text-slate-400">لا توجد أرقام مسجلة</p>

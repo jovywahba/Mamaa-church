@@ -33,7 +33,7 @@ export function UsersManager({ users, currentUserId }: { users: Row[]; currentUs
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
       <SectionCard title="إضافة مستخدم جديد" icon={<UserPlus />}>
         <form
           onSubmit={(e) => {
@@ -71,7 +71,7 @@ export function UsersManager({ users, currentUserId }: { users: Row[]; currentUs
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/80 text-xs text-slate-500">
+              <tr className="border-b border-slate-200 bg-slate-50 text-xs tracking-wide text-slate-600">
                 <th className="px-4 py-3 text-start font-bold">الاسم</th>
                 <th className="px-4 py-3 text-start font-bold">اسم المستخدم</th>
                 <th className="px-4 py-3 text-start font-bold">الصلاحية</th>
@@ -84,7 +84,7 @@ export function UsersManager({ users, currentUserId }: { users: Row[]; currentUs
               {users.map((u) => {
                 const self = u.id === currentUserId;
                 return (
-                  <tr key={u.id} className="align-top">
+                  <tr key={u.id} className="align-top leading-6 transition-colors hover:bg-slate-50/70">
                     <td className="px-4 py-3 font-semibold text-slate-900">
                       {u.full_name || "—"} {self && <span className="text-xs font-normal text-slate-400">(أنت)</span>}
                     </td>

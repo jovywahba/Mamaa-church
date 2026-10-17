@@ -51,7 +51,7 @@ export function DataTable<T>({ rows, columns, rowKey, rowHref, mobileCard }: Dat
               <tr
                 key={rowKey(row)}
                 onClick={(e) => onRowClick(e, row)}
-                className="group cursor-pointer transition-colors odd:bg-white even:bg-slate-50/40 hover:bg-primary-50/50"
+                className="group cursor-pointer transition-colors odd:bg-white even:bg-slate-50/40 focus-within:bg-primary-50/50 hover:bg-primary-50/50"
               >
                 {columns.map((c, i) => (
                   <td
@@ -59,7 +59,7 @@ export function DataTable<T>({ rows, columns, rowKey, rowHref, mobileCard }: Dat
                     className={cn(
                       "px-4 py-3.5 align-middle leading-6 text-slate-700",
                       // Accent on the leading (right, in RTL) edge of the hovered row.
-                      i === 0 && "shadow-[inset_-3px_0_0_transparent] transition-shadow group-hover:shadow-[inset_-3px_0_0_var(--color-primary-500)]",
+                      i === 0 && "shadow-[inset_-3px_0_0_transparent] transition-shadow group-focus-within:shadow-[inset_-3px_0_0_var(--color-primary-500)] group-hover:shadow-[inset_-3px_0_0_var(--color-primary-500)]",
                       c.className,
                     )}
                   >

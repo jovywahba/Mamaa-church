@@ -40,7 +40,7 @@ export function DeleteButton({ recordLabel, action, redirectTo, variant = "butto
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors group-hover:text-slate-600 hover:bg-red-50 hover:text-red-600"
+          className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors group-hover:text-slate-600 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
           aria-label={`حذف ${recordLabel}`}
           title="حذف"
         >

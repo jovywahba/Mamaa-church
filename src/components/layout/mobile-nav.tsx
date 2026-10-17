@@ -31,7 +31,7 @@ export function MobileNav({ profile, userBadge }: { profile: Profile; userBadge:
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex size-10 cursor-pointer items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 lg:hidden"
+        className="flex size-10 cursor-pointer items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 lg:hidden"
         aria-label="فتح القائمة"
         aria-expanded={open}
       >
@@ -48,7 +48,7 @@ export function MobileNav({ profile, userBadge }: { profile: Profile; userBadge:
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+                className="flex size-10 cursor-pointer items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
                 aria-label="إغلاق القائمة"
               >
                 <X className="size-5" />

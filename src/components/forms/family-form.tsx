@@ -46,8 +46,8 @@ export function FamilyForm({ caseId, defaultValues, types, servantNames }: Famil
   const onSubmit = (values: FamilyFormValues) => save(() => saveFamilyCase(caseId ?? null, values));
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalidToast)} className="space-y-6" noValidate>
-      <div className="grid gap-6 lg:grid-cols-2">
+    <form onSubmit={handleSubmit(onSubmit, onInvalidToast)} className="space-y-4 sm:space-y-5 lg:space-y-6" noValidate>
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
         <SectionCard title="بيانات الأب" icon={<User />}>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="اسم الأب" htmlFor="father_name" error={errors.father_name?.message} className="sm:col-span-3" required>
@@ -117,7 +117,7 @@ export function FamilyForm({ caseId, defaultValues, types, servantNames }: Famil
       </SectionCard>
 
       <SectionCard title="بيانات التواصل والعنوان" icon={<MapPin />}>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
           <Field label="العنوان" htmlFor="address" error={errors.address?.message}>
             <Textarea id="address" rows={4} {...register("address")} invalid={!!errors.address} />
           </Field>
